@@ -3,18 +3,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hotelapp/Utils/global.dart';
 import 'package:image_picker/image_picker.dart';
-import 'Data/dish.dart';
+import 'Data/entry.dart';
 import 'Services/api.dart';
-import 'Services/dishDB.dart';
+import 'Services/entryDB.dart';
 
-class NewDishForm extends StatefulWidget {
-  const NewDishForm({super.key});
+class NewEntryForm extends StatefulWidget {
+  const NewEntryForm({super.key});
 
   @override
-  NewDishFormState createState() => NewDishFormState();
+  NewEntryFormState createState() => NewEntryFormState();
 }
 
-class NewDishFormState extends State<NewDishForm> {
+class NewEntryFormState extends State<NewEntryForm> {
   final _formKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   var isLoading = false;
@@ -174,12 +174,12 @@ class NewDishFormState extends State<NewDishForm> {
       isLoading = true;
     });
 
-    Dish entry = Dish();
+    Entry entry = Entry();
     entry.name = nameController.text;
     entry.photo = imagePath;
 
-    var db = DishDBProvider.db;
-    db.newDish(entry);
+    var db = EntryDBProvider.db;
+    db.newEntry(entry);
 
     tempImg = null;
     tempImg = await Api.removebg(imagePath);

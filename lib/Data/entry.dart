@@ -1,9 +1,9 @@
-class Dish {
+class Entry {
   int? id;
   String name = "";
   String photo = "";
 
-  Dish({
+  Entry({
     int? id,
     String? name,
     String? photo,
@@ -17,7 +17,7 @@ class Dish {
     };
   }
 
-  Dish.fromMap(Map<String, dynamic> map) {
+  Entry.fromMap(Map<String, dynamic> map) {
     id = map['id'];
     name = map['name'];
     photo = map['photo'];

@@ -2,20 +2,20 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'Data/dish.dart';
+import 'Data/entry.dart';
 import 'Utils/global.dart';
 
-typedef updateCallback = void Function(BuildContext context, Dish entry);
+typedef updateCallback = void Function(BuildContext context, Entry entry);
 
-class DishTile extends StatefulWidget {
-  final Dish entry;
-  DishTile({super.key, required this.entry});
+class EntryTile extends StatefulWidget {
+  final Entry entry;
+  EntryTile({super.key, required this.entry});
 
   @override
-  DishTileState createState() => DishTileState();
+  EntryTileState createState() => EntryTileState();
 }
 
-class DishTileState extends State<DishTile> {
+class EntryTileState extends State<EntryTile> {
   double diameter = 28;
 
   @override

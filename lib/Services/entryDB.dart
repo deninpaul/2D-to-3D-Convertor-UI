@@ -2,12 +2,12 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import '../Data/dish.dart';
+import '../Data/entry.dart';
 
-class DishDBProvider {
-  DishDBProvider._();
-  String table = "Dish";
-  static final DishDBProvider db = DishDBProvider._();
+class EntryDBProvider {
+  EntryDBProvider._();
+  String table = "Entry";
+  static final EntryDBProvider db = EntryDBProvider._();
 
   static Database? _database;
   Future<Database> get database async => _database ??= await initDB();
@@ -25,37 +25,37 @@ class DishDBProvider {
     });
   }
 
-  newDish(Dish entry) async {
+  newEntry(Entry entry) async {
     final db = await database;
     var res = await db.insert(table, entry.toMap());
     return res;
   }
 
-  getAllDish() async {
+  getAllEntry() async {
     final db = await database;
     var res = await db.query(
       table,
       orderBy: "id DESC",
     );
-    List<Dish> list =
-        res.isNotEmpty ? res.map((c) => Dish.fromMap(c)).toList() : [];
+    List<Entry> list =
+        res.isNotEmpty ? res.map((c) => Entry.fromMap(c)).toList() : [];
     return list;
   }
 
-  getDish(int id) async {
+  getEntry(int id) async {
     final db = await database;
     var res = await db.query(table, where: "id = ?", whereArgs: [id]);
-    return res.isNotEmpty ? Dish.fromMap(res.first) : Null;
+    return res.isNotEmpty ? Entry.fromMap(res.first) : Null;
   }
 
-  updateDish(Dish entry) async {
+  updateEntry(Entry entry) async {
     final db = await database;
     var res = await db
         .update(table, entry.toMap(), where: "id = ?", whereArgs: [entry.id]);
     return res;
   }
 
-  deleteDish(int id) async {
+  deleteEntry(int id) async {
     final db = await database;
     db.delete(table, where: "id = ?", whereArgs: [id]);
   }

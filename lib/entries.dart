@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'Utils/global.dart';
 import 'package:hotelapp/newDialog.dart';
-import 'Services/dishDB.dart';
-import 'dishTile.dart';
+import 'Services/entryDB.dart';
+import 'entryTile.dart';
 
-class Dish extends StatefulWidget {
-  const Dish({super.key});
+class Entry extends StatefulWidget {
+  const Entry({super.key});
 
   @override
-  State<Dish> createState() => _DishState();
+  State<Entry> createState() => _EntryState();
 }
 
-class _DishState extends State<Dish> {
+class _EntryState extends State<Entry> {
   @override
   void initState() {
     super.initState();
@@ -34,7 +34,7 @@ class _DishState extends State<Dish> {
               parent: AlwaysScrollableScrollPhysics()),
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: FutureBuilder(
-            future: DishDBProvider.db.getAllDish(),
+            future: EntryDBProvider.db.getAllEntry(),
             builder: (context, AsyncSnapshot snapshot) {
               if (snapshot.data != null) {
                 return Column(
@@ -54,7 +54,7 @@ class _DishState extends State<Dish> {
                       shrinkWrap: true,
                       itemCount: snapshot.data.length,
                       itemBuilder: (context, index) {
-                        return DishTile(
+                        return EntryTile(
                           entry: snapshot.data[index],
                         );
                       },
@@ -83,7 +83,7 @@ class _DishState extends State<Dish> {
 
   Future refresher() async {
     setState(() {
-      DishDBProvider.db.getAllDish();
+      EntryDBProvider.db.getAllEntry();
     });
     return Future<void>.delayed(const Duration(seconds: 1));
   }
@@ -91,7 +91,7 @@ class _DishState extends State<Dish> {
   customFAB(BuildContext context) {
     return FloatingActionButton(
       onPressed: () => Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => NewDishForm())),
+          .push(MaterialPageRoute(builder: (context) => NewEntryForm())),
       child: const Icon(
         Icons.add,
         size: 32,

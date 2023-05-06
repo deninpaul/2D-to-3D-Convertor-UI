@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dish.dart';
+import 'entries.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       initialRoute: '/',
       routes: {
-        '/': (context) => const Dish(),
+        '/': (context) => const Entry(),
       },
       theme: ThemeData(
         

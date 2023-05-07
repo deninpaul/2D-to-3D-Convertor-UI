@@ -214,7 +214,7 @@ class NewEntryFormState extends State<NewEntryForm> {
       Entry newEntry = Entry();
       newEntry.name = nameController.text;
       newEntry.photo = imagePath;
-      newEntry.no_bg = await Api.removebg(imagePath, newEntry.name);
+      newEntry.no_bg = await Api.removebg(imagePath, newEntry.name.replaceAll(' ', '_'));
       entry = newEntry;
 
       setState(() {
@@ -392,7 +392,7 @@ class _GeneratingState extends State<Generating> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/generate.png", height: 280, fit: BoxFit.contain,),
+                  Image.asset("assets/generate.png", height: 264, fit: BoxFit.contain,),
                   const SizedBox(height: 32),
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 24),
@@ -402,7 +402,7 @@ class _GeneratingState extends State<Generating> {
                       child: const LinearProgressIndicator(
                         backgroundColor: Colors.white30,
                         valueColor: AlwaysStoppedAnimation(Colors.lightGreen),
-                        minHeight: 8,
+                        minHeight: 6,
                       ),
                     ),
                   ),
@@ -426,7 +426,7 @@ class _GeneratingState extends State<Generating> {
 
   generateModel() async {
     widget.entry.model =
-        await Api.generateModel(widget.entry.no_bg, widget.entry.name);
+        await Api.generateModel(widget.entry.no_bg, widget.entry.name.replaceAll(' ', '_'));
 
     var db = EntryDBProvider.db;
     db.newEntry(widget.entry);

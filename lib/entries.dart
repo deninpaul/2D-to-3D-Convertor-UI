@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'Utils/global.dart';
 import 'package:hotelapp/newDialog.dart';
 import 'Services/entryDB.dart';
@@ -15,6 +16,7 @@ class _EntryState extends State<Entry> {
   @override
   void initState() {
     super.initState();
+    requestPermissions();
   }
 
   @override
@@ -99,4 +101,11 @@ class _EntryState extends State<Entry> {
       ),
     );
   }
+
+  Future<void> requestPermissions() async {
+  final PermissionStatus status = await Permission.storage.request();
+  if (status != PermissionStatus.granted) {
+    throw Exception('Permission denied');
+  }
+}
 }

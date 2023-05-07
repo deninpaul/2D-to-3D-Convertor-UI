@@ -1,7 +1,8 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:hotelapp/viewModel.dart';
+import 'package:path_provider/path_provider.dart';
 import 'Data/entry.dart';
 import 'Services/entryDB.dart';
 import 'Utils/global.dart';
@@ -22,15 +23,15 @@ class EntryTileState extends State<EntryTile> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => open(),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        decoration: BoxDecoration(
-          color: darkGreen1,
-          borderRadius: BorderRadius.circular(24),
-        ),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: darkGreen1,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: InkWell(
+        onTap: () => open(),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -58,7 +59,7 @@ class EntryTileState extends State<EntryTile> {
                       style: textDecoration,
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () => open(),
                       style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
                           minimumSize: const Size(50, 30),
@@ -77,7 +78,7 @@ class EntryTileState extends State<EntryTile> {
                 if (choice == 'Delete') {
                   delete();
                 } else if (choice == 'Download') {
-                  download();
+                  download(context);
                 }
               },
               itemBuilder: (BuildContext context) {
@@ -105,20 +106,13 @@ class EntryTileState extends State<EntryTile> {
     );
   }
 
-  delete() async{
-    var db = EntryDBProvider.db;
-    db.deleteEntry(widget.entry.id!.toInt());
-    widget.refresher();
-  }
-
-  download() {
-    print("Download");
-  }
-
   open() {
-    print("Open");
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => ViewModel(
+              entry: widget.entry,
+              refresher: widget.refresher,
+            )));
   }
-
 
   var textDecoration = const TextStyle(
     fontSize: 18,
@@ -131,4 +125,33 @@ class EntryTileState extends State<EntryTile> {
     color: Colors.white70,
     fontWeight: FontWeight.w400,
   );
+
+  delete() async {
+    var db = EntryDBProvider.db;
+    db.deleteEntry(widget.entry.id!.toInt());
+    widget.refresher();
+  }
+
+  download(BuildContext context) async {
+    var downloadsDir;
+
+    if (Platform.isAndroid) {
+      downloadsDir = Directory('/storage/emulated/0/Download');
+    } else {
+      downloadsDir = await getDownloadsDirectory();
+    }
+
+    final sourceFile = File(widget.entry.model);
+    final destinationFile = await File(
+        "${downloadsDir?.path}/${widget.entry.name.replaceAll(' ', '_')}.glb").create();
+
+    try {
+      await sourceFile.copy(destinationFile.path);
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('File downloaded successfully.')));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error downloading file.')));
+    }
+  }
 }

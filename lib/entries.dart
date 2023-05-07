@@ -56,6 +56,7 @@ class _EntryState extends State<Entry> {
                       itemBuilder: (context, index) {
                         return EntryTile(
                           entry: snapshot.data[index],
+                          refresher: () => refresher(),
                         );
                       },
                     ),

@@ -1,8 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:hotelapp/Utils/global.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:page_transition/page_transition.dart';
 import 'Data/entry.dart';
 import 'Services/api.dart';
 import 'Services/entryDB.dart';
@@ -19,6 +20,8 @@ class NewEntryFormState extends State<NewEntryForm> {
   TextEditingController nameController = TextEditingController();
   var isLoading = false;
   var file, imagePath;
+  var entry = null;
+  dynamic _validationMsg;
 
   @override
   Widget build(BuildContext context) {
@@ -32,121 +35,152 @@ class NewEntryFormState extends State<NewEntryForm> {
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 24, horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Create \n3D Model",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 40,
-                    height: 1.25,
-                    color: Colors.white,
-                  ),
+          padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              progress(1),
+              const SizedBox(height: 32),
+              const Text(
+                "Create \n3D Model",
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 40,
+                  height: 1.25,
+                  color: Colors.white,
                 ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const SizedBox(height: 32),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(32.0),
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                          elevation: MaterialStateProperty.all<double>(0),
-                          backgroundColor:
-                              MaterialStateProperty.all<Color>(darkGreen1),
-                          padding: MaterialStateProperty.all<EdgeInsets>(
-                              const EdgeInsets.all(0)),
-                        ),
-                        onPressed: () {
-                          pickImage();
-                        },
-                        child: Container(
-                          height: 300,
-                          width: double.infinity,
-                          child: file == null
-                              ? Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: const [
-                                    Icon(
-                                      Icons.add_circle_outline,
-                                      color: Colors.lightGreen,
-                                      size: 64,
-                                    ),
-                                    SizedBox(height: 12),
-                                    Text(
-                                      "Pick Image",
-                                      style: TextStyle(
-                                          color: Colors.lightGreen,
-                                          fontSize: 16),
-                                    )
-                                  ],
-                                )
-                              : Image.file(
-                                  file,
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
+              ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const SizedBox(height: 32),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(32.0),
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        elevation: MaterialStateProperty.all<double>(0),
+                        backgroundColor:
+                            MaterialStateProperty.all<Color>(darkGreen1),
+                        padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.all(0)),
                       ),
-                    ),
-                    const SizedBox(height: 24),
-                    TextFormField(
-                      controller: nameController,
-                      style: formTextDecoration,
-                      cursorColor: Colors.lightGreen,
-                      decoration: formFieldDecoration("Model Name"),
-                      validator: (text) {
-                        if (text == null || text.isEmpty) {
-                          return "*This is a required Field";
-                        }
-                        return null;
+                      onPressed: () {
+                        pickImage();
                       },
-                    ),
-                    const SizedBox(height: 16),
-                    const SizedBox(height: 40),
-                    Container(
-                      width: double.infinity,
-                      height: 64,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            shape: const StadiumBorder()),
-                        onPressed: () {
-                          if (_formKey.currentState!.validate() &&
-                              isLoading == false) {
-                            onPressedCreate();
-                          }
-                        },
-                        child: !isLoading
-                            ? const Text(
-                                "Remove Background",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                      child: Container(
+                        height: 300,
+                        width: double.infinity,
+                        child: file == null
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.add_circle_outline,
+                                    color: Colors.lightGreen,
+                                    size: 64,
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    "Pick Image",
+                                    style: TextStyle(
+                                        color: Colors.lightGreen, fontSize: 16),
+                                  )
+                                ],
                               )
-                            : Container(
-                                height: 24,
-                                width: 24,
-                                child: const CircularProgressIndicator(
-                                  color: Colors.black,
-                                ),
+                            : Image.file(
+                                file,
+                                fit: BoxFit.cover,
                               ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                  const SizedBox(height: 24),
+                  TextField(
+                    controller: nameController,
+                    style: formTextDecoration,
+                    cursorColor: Colors.lightGreen,
+                    decoration: formFieldDecoration("Model Name"),
+                  ),
+                  _validationMsg != null
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 12, 0, 0),
+                          child: SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                _validationMsg,
+                                style: const TextStyle(color: Colors.redAccent),
+                              )),
+                        )
+                      : const SizedBox(height: 8),
+                  const SizedBox(height: 24),
+                  Container(
+                    width: double.infinity,
+                    height: 64,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          shape: const StadiumBorder()),
+                      onPressed: () {
+                        if (isLoading == false) {
+                          onPressedCreate();
+                        }
+                      },
+                      child: !isLoading
+                          ? const Text(
+                              "Remove Background",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            )
+                          : Container(
+                              height: 24,
+                              width: 24,
+                              child: const CircularProgressIndicator(
+                                color: Colors.black,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  formValidator(String text) async {
+    setState(() {
+      _validationMsg = null;
+    });
+
+    var db = EntryDBProvider.db;
+    bool exists = await db.entryExist(text);
+
+    if (imagePath == null) {
+      setState(() {
+        _validationMsg = "* Pick an image";
+      });
+      return;
+    }
+
+    if (exists) {
+      setState(() {
+        _validationMsg = "* File name already exists";
+      });
+      return;
+    }
+
+    if (text == null || text.isEmpty) {
+      setState(() {
+        _validationMsg = "* This is a required Field";
+      });
+      return;
+    }
   }
 
   var formTextDecoration = const TextStyle(
@@ -174,24 +208,33 @@ class NewEntryFormState extends State<NewEntryForm> {
       isLoading = true;
     });
 
-    Entry entry = Entry();
-    entry.name = nameController.text;
-    entry.photo = imagePath;
+    await formValidator(nameController.text);
 
-    var db = EntryDBProvider.db;
-    db.newEntry(entry);
+    if (_validationMsg == null) {
+      Entry newEntry = Entry();
+      newEntry.name = nameController.text;
+      newEntry.photo = imagePath;
+      newEntry.no_bg = await Api.removebg(imagePath, newEntry.name);
+      entry = newEntry;
 
-    tempImg = null;
-    tempImg = await Api.removebg(imagePath);
+      setState(() {
+        isLoading = false;
+      });
+
+      if (newEntry.no_bg != null) {
+        Navigator.push(
+            context,
+            PageTransition(
+              child: GenerateModel(entry: entry),
+              type: PageTransitionType.rightToLeft,
+              duration: Duration(milliseconds: 200),
+            ));
+      }
+    }
 
     setState(() {
       isLoading = false;
     });
-
-    if (tempImg != null) {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (context) => GenerateModel()));
-    }
   }
 
   Future pickImage() async {
@@ -208,7 +251,8 @@ class NewEntryFormState extends State<NewEntryForm> {
 }
 
 class GenerateModel extends StatefulWidget {
-  const GenerateModel({super.key});
+  final Entry entry;
+  const GenerateModel({super.key, required this.entry});
 
   @override
   State<GenerateModel> createState() => _GenerateModelState();
@@ -228,10 +272,12 @@ class _GenerateModelState extends State<GenerateModel> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+          padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              progress(2),
+              const SizedBox(height: 32),
               const Text(
                 "View Image",
                 style: TextStyle(
@@ -241,13 +287,16 @@ class _GenerateModelState extends State<GenerateModel> {
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               Container(
                 height: 300,
                 width: double.infinity,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(32.0),
-                  child: Image.memory(tempImg, fit: BoxFit.cover,),
+                  child: Image.file(
+                    File(widget.entry.no_bg),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
               const SizedBox(height: 36),
@@ -291,13 +340,139 @@ class _GenerateModelState extends State<GenerateModel> {
       isLoading = true;
     });
 
-    await Future<void>.delayed(const Duration(seconds: 2));
+    await Future<void>.delayed(const Duration(seconds: 1));
 
     setState(() {
       isLoading = false;
     });
 
+    Navigator.push(
+        context,
+        PageTransition(
+          child: Generating(entry: widget.entry),
+          type: PageTransitionType.rightToLeft,
+          duration: Duration(milliseconds: 200),
+        ));
+  }
+}
+
+class Generating extends StatefulWidget {
+  final Entry entry;
+  const Generating({super.key, required this.entry});
+
+  @override
+  State<Generating> createState() => _GeneratingState();
+}
+
+class _GeneratingState extends State<Generating> {
+  @override
+  void initState() {
+    super.initState();
+    generateModel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: darkGreen2,
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 0,
+        backgroundColor: darkGreen2,
+      ),
+      body: Container(
+        height: double.infinity,
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        child: Column(
+          children: [
+            progress(3),
+            Expanded(
+              flex: 1,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/generate.png", height: 280, fit: BoxFit.contain,),
+                  const SizedBox(height: 32),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: const LinearProgressIndicator(
+                        backgroundColor: Colors.white30,
+                        valueColor: AlwaysStoppedAnimation(Colors.lightGreen),
+                        minHeight: 8,
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "Hang on while we generate your model.\nThis might take a while.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      height: 1.5,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  generateModel() async {
+    widget.entry.model =
+        await Api.generateModel(widget.entry.no_bg, widget.entry.name);
+
+    var db = EntryDBProvider.db;
+    db.newEntry(widget.entry);
+
     Navigator.of(context)
         .pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
   }
+}
+
+progress(int stepNo) {
+  var height = 4.0;
+
+  return Row(
+    children: [
+      Expanded(
+        flex: 1,
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            color: stepNo > 0 ? Colors.lightGreen : Colors.white38,
+          ),
+        ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        flex: 1,
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            color: stepNo > 1 ? Colors.lightGreen : Colors.white38,
+          ),
+        ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        flex: 1,
+        child: Container(
+          height: height,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(40),
+            color: stepNo > 2 ? Colors.lightGreen : Colors.white38,
+          ),
+        ),
+      ),
+    ],
+  );
 }

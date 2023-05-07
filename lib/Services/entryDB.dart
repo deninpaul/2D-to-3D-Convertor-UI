@@ -20,7 +20,9 @@ class EntryDBProvider {
       await db.execute("CREATE TABLE $table ("
           "id INTEGER PRIMARY KEY,"
           "name TEXT,"
-          "photo TEXT"
+          "photo TEXT,"
+          "no_bg TEXT,"
+          "model TEXT"
           ")");
     });
   }
@@ -40,6 +42,12 @@ class EntryDBProvider {
     List<Entry> list =
         res.isNotEmpty ? res.map((c) => Entry.fromMap(c)).toList() : [];
     return list;
+  }
+
+  entryExist(String name) async {
+    final db = await database;
+    var res = await db.query(table, where: "LOWER(name) = ?", whereArgs: [name.toLowerCase()]);
+    return res.isNotEmpty ? true : false;
   }
 
   getEntry(int id) async {

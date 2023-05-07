@@ -1,23 +1,41 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class Api{
-  static const apiKey = "7z9atAESuNeXcPDsyuQQNnL8";
-  static var baseUrl = Uri.parse("https://api.remove.bg/v1.0/removebg");
+  static var baseUrl = "http://192.168.1.205:5050";
 
-  static removebg(String imgPath) async {
-    var req = http.MultipartRequest("POST", baseUrl);
+  static removebg(String imgPath, String filename) async {
+    var req = http.MultipartRequest("POST", Uri.parse("$baseUrl/remove-bg"));
+    req.files.add(await http.MultipartFile.fromPath("image", imgPath));
 
-    req.headers.addAll({"X-API-Key": apiKey});
-
-    req.files.add(await http.MultipartFile.fromPath("image_file", imgPath));
-
-    req.fields.addAll({"bg_color": "white"});
+    final dir = await getApplicationDocumentsDirectory();
+    final path = "${dir.path}/$filename.png";
 
     final res = await req.send();
 
     if(res.statusCode == 200) {
       http.Response img = await http.Response.fromStream(res);
-      return img.bodyBytes;
+      final file = File(path);
+      await file.writeAsBytes(img.bodyBytes);
+      return path;
+    }
+  }
+
+  static generateModel(String imgPath, String filename) async {
+    var req = http.MultipartRequest("POST", Uri.parse("$baseUrl/generate"));
+    req.files.add(await http.MultipartFile.fromPath("image", imgPath));
+
+    final dir = await getApplicationDocumentsDirectory();
+    final path = "${dir.path}/$filename.glb";
+
+    final res = await req.send();
+    if(res.statusCode == 200) {
+      http.Response model = await http.Response.fromStream(res);
+      final file = File(path);
+      await file.writeAsBytes(model.bodyBytes);
+      return path;
     }
   }
 }

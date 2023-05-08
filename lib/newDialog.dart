@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 import 'package:hotelapp/Utils/global.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
@@ -22,6 +23,7 @@ class NewEntryFormState extends State<NewEntryForm> {
   var file, imagePath;
   var entry = null;
   dynamic _validationMsg;
+  bool removeBG = true;
 
   @override
   Widget build(BuildContext context) {
@@ -103,6 +105,33 @@ class NewEntryFormState extends State<NewEntryForm> {
                     cursorColor: Colors.lightGreen,
                     decoration: formFieldDecoration("Model Name"),
                   ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Row(
+                      children: [
+                        FlutterSwitch(
+                          value: removeBG,
+                          width: 52,
+                          height: 32,
+                          inactiveColor: Colors.white24,
+                          activeColor: Colors.lightGreen,
+                          onToggle: (val) {
+                            setState(() => removeBG = !removeBG);
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        const Text(
+                          "Remove Background",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
                   _validationMsg != null
                       ? Padding(
                           padding: const EdgeInsets.fromLTRB(16, 12, 0, 0),
@@ -128,9 +157,11 @@ class NewEntryFormState extends State<NewEntryForm> {
                         }
                       },
                       child: !isLoading
-                          ? const Text(
-                              "Remove Background",
-                              style: TextStyle(
+                          ? Text(
+                              (removeBG)
+                                  ? "Remove Background"
+                                  : "Generate Model",
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -214,7 +245,15 @@ class NewEntryFormState extends State<NewEntryForm> {
       Entry newEntry = Entry();
       newEntry.name = nameController.text;
       newEntry.photo = imagePath;
-      newEntry.no_bg = await Api.removebg(imagePath, newEntry.name.replaceAll(' ', '_'));
+
+      if(removeBG) {
+        newEntry.no_bg =
+          await Api.removebg(imagePath, newEntry.name.replaceAll(' ', '_'));
+      } else {
+        await Future<void>.delayed(const Duration(seconds: 1));
+        newEntry.no_bg = imagePath;
+      }
+      
       entry = newEntry;
 
       setState(() {
@@ -222,13 +261,24 @@ class NewEntryFormState extends State<NewEntryForm> {
       });
 
       if (newEntry.no_bg != null) {
-        Navigator.push(
+        if (removeBG) {
+          Navigator.push(
             context,
             PageTransition(
               child: GenerateModel(entry: entry),
               type: PageTransitionType.rightToLeft,
               duration: Duration(milliseconds: 200),
             ));
+        } else {
+          Navigator.push(
+            context,
+            PageTransition(
+              child: Generating(entry: entry),
+              type: PageTransitionType.rightToLeft,
+              duration: Duration(milliseconds: 200),
+            ));
+        }
+        
       }
     }
 
@@ -392,7 +442,11 @@ class _GeneratingState extends State<Generating> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset("assets/generate.png", height: 264, fit: BoxFit.contain,),
+                  Image.asset(
+                    "assets/generate.png",
+                    height: 264,
+                    fit: BoxFit.contain,
+                  ),
                   const SizedBox(height: 32),
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 24),
@@ -425,8 +479,8 @@ class _GeneratingState extends State<Generating> {
   }
 
   generateModel() async {
-    widget.entry.model =
-        await Api.generateModel(widget.entry.no_bg, widget.entry.name.replaceAll(' ', '_'));
+    widget.entry.model = await Api.generateModel(
+        widget.entry.no_bg, widget.entry.name.replaceAll(' ', '_'));
 
     var db = EntryDBProvider.db;
     db.newEntry(widget.entry);

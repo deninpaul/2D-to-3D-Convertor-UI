@@ -1,10 +1,10 @@
 import 'dart:io';
-
+import '../Utils/global.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class Api{
-  static var baseUrl = "http://192.168.1.205:5050";
+  static var baseUrl = apiURL;
 
   static removebg(String imgPath, String filename) async {
     var req = http.MultipartRequest("POST", Uri.parse("$baseUrl/remove-bg"));

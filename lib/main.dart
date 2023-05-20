@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hotelapp/Utils/global.dart';
 import 'entries.dart';
 
 void main() {
@@ -10,6 +11,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    azureURL = apiURL;
+
     return MaterialApp(
       initialRoute: '/',
       routes: {

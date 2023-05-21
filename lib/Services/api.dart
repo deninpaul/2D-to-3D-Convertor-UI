@@ -4,10 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
 class Api{
-  static var baseUrl = apiURL;
-
   static removebg(String imgPath, String filename) async {
-    var req = http.MultipartRequest("POST", Uri.parse("$baseUrl/remove-bg"));
+    var req = http.MultipartRequest("POST", Uri.parse("$apiURL/remove-bg"));
     req.files.add(await http.MultipartFile.fromPath("image", imgPath));
 
     final dir = await getApplicationDocumentsDirectory();
@@ -24,7 +22,7 @@ class Api{
   }
 
   static generateModel(String imgPath, String filename) async {
-    var req = http.MultipartRequest("POST", Uri.parse("$baseUrl/generate"));
+    var req = http.MultipartRequest("POST", Uri.parse("$apiURL/generate"));
     req.files.add(await http.MultipartFile.fromPath("image", imgPath));
 
     final dir = await getApplicationDocumentsDirectory();

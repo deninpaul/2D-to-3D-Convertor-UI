@@ -149,6 +149,9 @@ class _SettingsState extends State<Settings> {
   @override
   void initState() {
     super.initState();
+    if(apiURL.isEmpty) {
+      apiURL = azureURL;
+    }
     urlController.text = apiURL;
   }
 
@@ -204,7 +207,9 @@ class _SettingsState extends State<Settings> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(shape: const StadiumBorder()),
               onPressed: () {
-                apiURL = urlController.text;
+                setState(() {
+                  apiURL = urlController.text;
+                });
                 Navigator.of(context).pop();
               },
               child: const Text(

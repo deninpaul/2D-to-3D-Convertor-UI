@@ -11,8 +11,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    azureURL = apiURL;
-
     return MaterialApp(
       initialRoute: '/',
       routes: {
